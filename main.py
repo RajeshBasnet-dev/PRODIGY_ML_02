@@ -1,48 +1,65 @@
-# Step 1: Import libraries
+# Customer Segmentation using K-Means Clustering
+# Groups customers based on Annual Income and Spending Score
+
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.cluster import KMeans
 
-# Step 2: Load dataset (make sure you downloaded 'Mall_Customers.csv' from Kaggle)
+# Load the dataset (ensure 'Mall_Customers.csv' is in the same folder)
 data = pd.read_csv('Mall_Customers.csv')
 
-# Step 3: Data exploration 
-plt.figure(figsize=(8,5))
+# View first few rows
+print("First 5 rows of dataset:")
+print(data.head())
+
+# Plot Annual Income vs Spending Score
+plt.figure(figsize=(8, 5))
 sns.scatterplot(data=data, x='Annual Income (k$)', y='Spending Score (1-100)')
-plt.title('Customer Distribution by Income and Spending Score')
+plt.title('Customer Distribution: Income vs Spending Score')
+plt.xlabel('Annual Income (k$)')
+plt.ylabel('Spending Score')
 plt.show()
 
-# Step 4: Prepare data for clustering
-X = data[['Annual Income (k$)', 'Spending Score (1-100)']].values
+# Select features for clustering
+features = data[['Annual Income (k$)', 'Spending Score (1-100)']].values
 
-# # Step 5: Use Elbow method to find optimal number of clusters
-# wcss = []
-# for k in range(1, 11):
-#     kmeans = KMeans(n_clusters=k, random_state=42)
-#     kmeans.fit(X)
-#     wcss.append(kmeans.inertia_)
+# Use Elbow Method to find optimal number of clusters
+wcss = []
+for k in range(1, 11):
+ kmeans = KMeans(n_clusters=k, random_state=42)
+kmeans.fit(features)
 
-# plt.figure(figsize=(8,5))
-# plt.plot(range(1, 11), wcss, marker='o')
-# plt.title('Elbow Method to find optimal k')
-# plt.xlabel('Number of clusters')
-# plt.ylabel('WCSS')
-# plt.show()
+wcss.append(kmeans.inertia_)
 
-# # Step 6: Apply K-means clustering with k=5 (based on elbow plot)
-# k = 5
-# kmeans = KMeans(n_clusters=k, random_state=42)
-# clusters = kmeans.fit_predict(X)
+# Plot WCSS to find the elbow
+plt.figure(figsize=(8, 5))
+plt.plot(range(1, 11), wcss, marker='o', linestyle='--')
+plt.title('Elbow Method for Optimal Clusters')
+plt.xlabel('Number of Clusters (k)')
+plt.ylabel('WCSS')
+plt.grid(True)
+plt.show()
 
-# # Step 7: Add cluster labels to dataframe
-# data['Cluster'] = clusters
+# Choose optimal clusters (e.g., 5) and fit KMeans
+optimal_k = 5
+kmeans = KMeans(n_clusters=optimal_k, random_state=42)
+data['Cluster'] = kmeans.fit_predict(features)
 
-# # Step 8: Visualize clusters
-# plt.figure(figsize=(8,5))
-# sns.scatterplot(x=X[:,0], y=X[:,1], hue=clusters, palette='Set1')
-# plt.scatter(kmeans.cluster_centers_[:,0], kmeans.cluster_centers_[:,1], s=200, c='black', marker='X')  # centroids
-# plt.title('Customer Segments based on Income and Spending Score')
-# plt.xlabel('Annual Income (k$)')
-# plt.ylabel('Spending Score (1-100)')
-# plt.show()
+# Plot clusters with centroids
+plt.figure(figsize=(8, 5))
+sns.scatterplot(x=features[:, 0], y=features[:, 1], hue=data['Cluster'], palette='Set1')
+plt.scatter(kmeans.cluster_centers_[:, 0], kmeans.cluster_centers_[:, 1], 
+s=200, c='black', marker='X', label='Centroids')
+plt.title('Customer Segments by Income and Spending Score')
+plt.xlabel('Annual Income (k$)')
+plt.ylabel('Spending Score')
+plt.legend(title='Cluster')
+plt.show()
+
+# Print summary of clusters
+for i in range(optimal_k):
+ cluster = data[data['Cluster'] == i]
+print(f"Cluster {i}: {len(cluster)} customers")
+print(f"  Average Income: {cluster['Annual Income (k$)'].mean():.2f}k")
+print(f"  Average Spending Score: {cluster['Spending Score (1-100)'].mean():.2f}\n")
