@@ -13,8 +13,8 @@ sns.scatterplot(data=data, x='Annual Income (k$)', y='Spending Score (1-100)')
 plt.title('Customer Distribution by Income and Spending Score')
 plt.show()
 
-# # Step 4: Prepare data for clustering
-# X = data[['Annual Income (k$)', 'Spending Score (1-100)']].values
+# Step 4: Prepare data for clustering
+X = data[['Annual Income (k$)', 'Spending Score (1-100)']].values
 
 # # Step 5: Use Elbow method to find optimal number of clusters
 # wcss = []
